@@ -23,4 +23,4 @@ def myCNN():
 	#model.add(Dropout(0.5))
 	model.add(Dense(1))
 
-        return model
+	return model
