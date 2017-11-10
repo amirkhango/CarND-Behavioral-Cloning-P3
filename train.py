@@ -2,18 +2,16 @@ import csv
 import cv2
 import numpy as np
 
-
-lines=[]
-
-with open('./data/driving_log.csv') as csvfile:
+def load_data():
+ lines=[]
+ with open('./data/driving_log.csv') as csvfile:
 	reader = csv.reader(csvfile)
 	for line in reader:
 		lines.append(line)
+ images=[]
+ measurements=[]
 
-images=[]
-measurements=[]
-
-for line in lines:
+ for line in lines:
 	source_path=line[0]
 	filename = source_path.split('/')[-1]
 	current_path='./data/IMG/'+ filename
@@ -22,31 +20,35 @@ for line in lines:
 
 	measurement = float(line[3])
 	measurements.append(measurement)
+##X_train=np.array(images)[:1002]
+##y_train=np.array(measurements)[:1002]
 
-X_train=np.array(images)[:1002]
-y_train=np.array(measurements)[:1002]
+ X_train=np.array(images)
+ y_train=np.array(measurements)
+ 
+ return X_train, y_train
 
-from keras.models import Sequential
-from keras.layers import Flatten, Dense, Lambda
-from keras.layers import Conv2D, MaxPooling2D
+def build_model():
+ model = myCNN()
+ model.complie(loss='mse', optimizer='adam')
+ model.summary()
+ return model
 
-model = Sequential()
-model.add(Lambda(lambda x: x/255.0 - 0.5, input_shape=(160,320,3)))
-model.add(Conv2D(32, kernel_size=(3, 3),
-                 activation='relu',
-                 ))
-model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-#model.add(Dropout(0.25))
-model.add(Flatten())
-model.add(Dense(128, activation='relu'))
-#model.add(Dropout(0.5))
-model.add(Dense(1))
+def  main():
+ print("loading data...")
+ X_train, y_train = load_data()
 
-model.compile(loss='mse', optimizer='adam')
-model.fit(X_train, y_train, validation_split=0.2,
-	shuffle=True, nb_epoch=2)
+ 
+ model = myCNN()
+ early_stopping = EarlyStopping(monitor='val_mse', patience =5, mode='min')
+ model_checkpoint = ModelCheckpoint(
+	    fname_param, monitor='val_mse', verbose=0, save_best_only=True, mode='min')
+ 
+ model.fit(X_train, y_train, validation_split=0.2,
+        shuffle=True, nb_epoch=2,
+        callbacks=[early_stopping, model_checkpoint],)
 
-model.save('model.h5')
+ model.save('model.h5')
 
-
+if __name__ == '__main__':
+    main()
