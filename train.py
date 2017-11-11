@@ -4,15 +4,15 @@ import numpy as np
 import os
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from models import *
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import pickle
-
-
 
 np.random.seed(1337)  # for reproducibility
 path_model='./MODEL'
 path_log = './log'
-nb_epoch=100
+nb_epoch=5
 batch_size=32
 hyperparams_name = 'myCNN'
 
@@ -52,10 +52,11 @@ def load_data():
 		measurements.append(measurement)
 	#X=np.array(images)[:30]
 	#y=np.array(measurements)[:30]
-
+        
 	X=np.array(images)
 	y=np.array(measurements)
-
+	np.random.shuffle(X)
+	np.random.shuffle(y)
 	return X, y
 
 def build_model():
