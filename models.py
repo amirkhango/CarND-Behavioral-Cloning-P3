@@ -8,18 +8,20 @@ def myCNN():
 	model.add(Lambda(lambda x: x/255.0 - 0.5))
 	model.add(Conv2D(16, kernel_size=(3, 3),
 			 activation='relu',
-			 ))
-	model.add(Conv2D(16, (3, 3), activation='relu'))
-
-	model.add(Conv2D(32, (3, 3), activation='relu'))
+			 )
+	)
+	
+	model.add(Conv2D(16, kernel_size=(3, 3),
+                         activation='relu',
+                         ))
 	model.add(MaxPooling2D(pool_size=(2, 2)))
-	model.add(Conv2D(64, (3, 3), activation='relu'))
+	model.add(Conv2D(32, (3, 3), activation='relu'))
 	model.add(MaxPooling2D(pool_size=(2, 2)))
 
 #	model.add(Dropout(0.5))
 	model.add(Flatten())
-	model.add(Dense(300, activation='relu'))
-	model.add(Dense(80, activation='relu'))
+	model.add(Dense(32, activation='relu'))
+	model.add(Dense(16, activation='relu'))
 	#model.add(Dropout(0.5))
 	model.add(Dense(1))
 
