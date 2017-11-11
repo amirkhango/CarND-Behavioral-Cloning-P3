@@ -1,5 +1,6 @@
 import csv
 import cv2
+from PIL import Image
 import numpy as np
 import os
 from keras.callbacks import EarlyStopping, ModelCheckpoint
@@ -12,7 +13,7 @@ import pickle
 np.random.seed(1337)  # for reproducibility
 path_model='./MODEL'
 path_log = './log'
-nb_epoch=5
+nb_epoch=3
 batch_size=32
 hyperparams_name = 'myCNN'
 
@@ -45,7 +46,7 @@ def load_data():
 		source_path=line[0]
 		filename = source_path.split('/')[-1]
 		current_path='./data/IMG/'+ filename
-		image = cv2.imread(current_path)
+		image = np.asarray(Image.open((current_path)))
 		images.append(image)
 
 		measurement = float(line[3])
@@ -83,8 +84,11 @@ def main():
 	    batch_size=batch_size,
 	    callbacks=[early_stopping, model_checkpoint],)
 
-	model.save_weights(os.path.join(path_model, '{}.h5'.format(hyperparams_name)), overwrite=True)
+	model.save(os.path.join(path_model, '{}.h5'.format(hyperparams_name)), overwrite=True)
+	print('{} is saved in {}'.format('{}.h5'.format(hyperparams_name), path_model))
 	pickle.dump((history.history), open(os.path.join(path_log, '{}.history.pkl'.format(hyperparams_name)), 'wb'))
+
+
 	print('=' * 10)
 	# list all data in history
 	print(history.history.keys())
