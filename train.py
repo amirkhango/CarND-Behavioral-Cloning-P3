@@ -13,7 +13,7 @@ import pickle
 np.random.seed(1337)  # for reproducibility
 path_model='./MODEL'
 path_log = './log'
-nb_epoch=3
+nb_epoch=5
 batch_size=32
 hyperparams_name = 'myCNN'
 
@@ -44,9 +44,10 @@ def load_data():
 
 	for line in lines:
 		source_path=line[0]
-		filename = source_path.split('/')[-1]
-		current_path='./data/IMG/'+ filename
-		image = np.asarray(Image.open((current_path)))
+		#filename = source_path.split('/')[-1]
+		#current_path='./data/IMG/'+ filename
+		current_path='./data/'+source_path
+		image = np.asarray(Image.open(current_path))
 		images.append(image)
 
 		measurement = float(line[3])
@@ -78,7 +79,7 @@ def main():
 	    fname_param, monitor='val_mse', verbose=0, save_best_only=True, mode='min')
 
 	model = build_model()
-	history = model.fit(X_train, y_train, validation_split=0.2,
+	history = model.fit(X_train, y_train, validation_split=0.1,
 	    shuffle=True,
 	    nb_epoch=nb_epoch,
 	    batch_size=batch_size,

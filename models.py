@@ -1,5 +1,5 @@
 from keras.models import Sequential
-from keras.layers import Flatten, Dense, Lambda, Dropout
+from keras.layers import Flatten, Dense, Lambda, Dropout, BatchNormalization
 from keras.layers import Conv2D, MaxPooling2D, Cropping2D
 
 def myCNN():
@@ -10,18 +10,19 @@ def myCNN():
 			 activation='relu',
 			 )
 	)
-	
+	model.add(BatchNormalization())	
 	model.add(Conv2D(16, kernel_size=(3, 3),
                          activation='relu',
                          ))
-	model.add(MaxPooling2D(pool_size=(2, 2)))
+	model.add(BatchNormalization())
 	model.add(Conv2D(32, (3, 3), activation='relu'))
-	model.add(MaxPooling2D(pool_size=(2, 2)))
-
-#	model.add(Dropout(0.5))
+	#model.add(MaxPooling2D(pool_size=(2, 2)))
+	model.add(BatchNormalization())
+	model.add(Conv2D(32, (3, 3), activation='relu'))
+	#model.add(Dropout(0.5))
 	model.add(Flatten())
-	model.add(Dense(32, activation='relu'))
-	model.add(Dense(16, activation='relu'))
+	model.add(Dense(100, activation='relu'))
+	model.add(Dense(30, activation='relu'))
 	#model.add(Dropout(0.5))
 	model.add(Dense(1))
 
