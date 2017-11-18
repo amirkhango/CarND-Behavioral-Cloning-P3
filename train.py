@@ -10,6 +10,7 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import pickle
 from keras.models import load_model
+import sklearn
 
 np.random.seed(1337)  # for reproducibility
 path_model='./MODEL'
@@ -20,6 +21,8 @@ hyperparams_name = 'myCNN'
 save_file = os.path.join(path_log, '{}.loss.png'.format(hyperparams_name))
 
 load_pre_model = True
+CAMERA == False
+FLIP == False
 
 def visual_log(history,save_path):
 	# summarize history for loss
@@ -44,45 +47,64 @@ def load_samples():
 	return samples
 
 def gen_data(samples, batch_size):
-	
+
+	def get_pic_and_label(source_path):
+
+		filename = source_path.split('/')[-1]
+		current_path='./data/IMG/'+ filename
+		image = np.asarray(Image.open(current_path))
+		measurement = float(line[3])
+
+		return image, measurement
+		
 	#offset = 0 
 	#print('number of samples is:', len(lines))	
 	num_samples = len(samples)
+
 	while True:
-		for offset in range(0, num_samples, batch_size):
-			
+		sklearn.utils.shuffle(samples)		
+		for offset in range(0, num_samples, batch_size):			
 			images=[]
 			measurements=[]
 			batch_lines = samples[ offset : offset + batch_size]
 
 			for line in batch_lines:
+				center_path=line[0]
 
-				source_path=line[0]
-				filename = source_path.split('/')[-1]
-				current_path='./data/IMG/'+ filename
-				#current_path='./data/'+source_path
-				image = np.asarray(Image.open(current_path))
+				image, measurement = get_pic_and_label(center_path)
 				images.append(image)
-
-				measurement = float(line[3])
 				measurements.append(measurement)
 
 				# Data Augmentation by Flip
-				image_flipped = np.fliplr(image)
-				measurement_flipped = -measurement
-				images.append(image_flipped)
-				measurements.append(measurement_flipped)
+				if FLIP == True:
+					flip_prob = np.random.random()
+					if flip_prob > 0.5:					
+						image_flipped = np.fliplr(image)
+						measurement_flipped = -measurement
+						images.append(image_flipped)
+						measurements.append(measurement_flipped)
 
+				# Data Augmentation by right or left camera
+				if CAMERA == True:
+					camera = np.random.choice(['center', 'left', 'right'])
+					if camera == 'left':
 
-		#X=np.array(images)[:30]
-		#y=np.array(measurements)[:30]
+						left_path=line[1]
+						image, measurement = get_pic_and_label(left_path)
+						images.append(image)
+						measurements.append(measurement+0.25)
+
+					else camera == 'right':
+						
+						right_path=line[2]
+						image, measurement = get_pic_and_label(right_path)
+						images.append(image)
+						measurements.append(measurement-0.25)
 	        
 				X=np.array(images)
 				y=np.array(measurements)
-				np.random.shuffle(X)
-				np.random.shuffle(y)
 
-			yield X, y
+			yield sklearn.utils.shuffle(X, y)
 
 def build_model():
 	model = myCNN()
