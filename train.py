@@ -13,8 +13,8 @@ import pickle
 np.random.seed(1337)  # for reproducibility
 path_model='./MODEL'
 path_log = './log'
-nb_epoch=5
-batch_size=2
+nb_epoch=10
+batch_size=64
 hyperparams_name = 'myCNN'
 save_file = os.path.join(path_log, '{}.loss.png'.format(hyperparams_name))
 
@@ -84,7 +84,7 @@ def main():
 
 	print("loading data...")
 
-	samples = load_samples()[:20]
+	samples = load_samples()[:]
 	len_samples = len(samples)
 
 	train_samples = samples[ :-int(len_samples*0.1) ]
@@ -94,9 +94,9 @@ def main():
 
 	fname_param = os.path.join(path_model, '{}.best.h5'.format(hyperparams_name))
 	
-	early_stopping = EarlyStopping(monitor='val_mse', patience =5, mode='min')
+	early_stopping = EarlyStopping(monitor='val_loss', patience =3, mode='min')
 	model_checkpoint = ModelCheckpoint(
-	    fname_param, monitor='val_mse', verbose=0, save_best_only=True, mode='min')
+	    fname_param, monitor='val_loss', verbose=0, save_best_only=True, mode='min')
 
 	model = build_model()
 
@@ -105,16 +105,15 @@ def main():
 		validation_data = valid_generator,
 		validation_steps = len(valid_samples) / batch_size,
 	    nb_epoch = nb_epoch,
-	    verbose = 0,
+	    verbose = 1,
 	    callbacks = [early_stopping, model_checkpoint])
 
+	print('=' * 30)
+	
+	# list all data in history
 	model.save(os.path.join(path_model, '{}.h5'.format(hyperparams_name)), overwrite=True)
 	print('{} is saved in {}'.format('{}.h5'.format(hyperparams_name), path_model))
 	pickle.dump((history.history), open(os.path.join(path_log, '{}.history.pkl'.format(hyperparams_name)), 'wb'))
-
-
-	print('=' * 10)
-	# list all data in history
 	print(history.history.keys())
 
 	visual_log(history=history.history, save_path=save_file)

@@ -10,6 +10,7 @@ def myCNN():
 			 activation='relu',
 			 )
 	)
+	model.add(MaxPooling2D(pool_size=(2, 2), strides=None, padding='valid'))
 	model.add(BatchNormalization())	
 	model.add(Conv2D(16, kernel_size=(3, 3),
                          activation='relu',
@@ -19,6 +20,7 @@ def myCNN():
 	#model.add(MaxPooling2D(pool_size=(2, 2)))
 	model.add(BatchNormalization())
 	model.add(Conv2D(32, (3, 3), activation='relu'))
+	model.add(MaxPooling2D(pool_size=(2, 2), strides=None, padding='valid'))
 	#model.add(Dropout(0.5))
 	model.add(Flatten())
 	model.add(Dense(100, activation='relu'))
