@@ -9,14 +9,17 @@ import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import pickle
+from keras.models import load_model
 
 np.random.seed(1337)  # for reproducibility
 path_model='./MODEL'
 path_log = './log'
-nb_epoch=10
+nb_epoch=6
 batch_size=64
 hyperparams_name = 'myCNN'
 save_file = os.path.join(path_log, '{}.loss.png'.format(hyperparams_name))
+
+load_pre_model = True
 
 def visual_log(history,save_path):
 	# summarize history for loss
@@ -110,7 +113,10 @@ def main():
 	model_checkpoint = ModelCheckpoint(
 	    fname_param, monitor='val_loss', verbose=0, save_best_only=True, mode='min')
 
-	model = build_model()
+	if load_pre_model is True:
+		model = load_model(os.path.join(path_model, '{}.h5'.format(hyperparams_name)))
+	else:
+		model = build_model()
 
 	history = model.fit_generator(train_generator, 
 		steps_per_epoch = len(train_samples*2) // batch_size, 
@@ -120,15 +126,20 @@ def main():
 	    verbose = 1,
 	    callbacks = [early_stopping, model_checkpoint])
 
-	print('=' * 30)
+	print('=' * 100)
 	
 	# list all data in history
-	model.save(os.path.join(path_model, '{}.h5'.format(hyperparams_name)), overwrite=True)
-	print('{} is saved in {}'.format('{}.h5'.format(hyperparams_name), path_model))
-	pickle.dump((history.history), open(os.path.join(path_log, '{}.history.pkl'.format(hyperparams_name)), 'wb'))
-	print(history.history.keys())
+	if load_pre_model is True:
+		model.save(os.path.join(path_model, '{}.h5'.format(hyperparams_name)), overwrite=True)
+		print('{} is saved in {}'.format('{}.h5'.format(hyperparams_name), path_model))
+		pickle.dump((history.history), open(os.path.join(path_log, '{}.history.pkl'.format(hyperparams_name)), 'wb'))		
+		visual_log(history=history.history, save_path=save_file)
 
-	visual_log(history=history.history, save_path=save_file)
+	else:
+		model.save(os.path.join(path_model, '{}.cont.h5'.format(hyperparams_name)), overwrite=True)
+		print('{} is saved in {}'.format('{}.cont.h5'.format(hyperparams_name), path_model))
+
+	print(history.history.keys())
 
 
 if __name__ == '__main__':
