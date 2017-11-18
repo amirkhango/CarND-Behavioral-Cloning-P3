@@ -64,6 +64,13 @@ def gen_data(samples, batch_size):
 				measurement = float(line[3])
 				measurements.append(measurement)
 
+				# Data Augmentation by Flip
+				image_flipped = np.fliplr(image)
+				measurement_flipped = -measurement
+				images.append(image_flipped)
+				measurements.append(measurement_flipped)
+
+
 		#X=np.array(images)[:30]
 		#y=np.array(measurements)[:30]
 	        
@@ -89,6 +96,11 @@ def main():
 
 	train_samples = samples[ :-int(len_samples*0.1) ]
 	valid_samples = samples[ -int(len_samples*0.1): ]
+	print('The number of all original (without augmented data) samples is: {} \n,\
+		the number of original train_samples is : {} \n \
+		the number of original valid_samples is : {} \n'
+		.format(len(samples), len(train_samples), len(valid_samples)))
+
 	train_generator = gen_data(train_samples, batch_size)
 	valid_generator = gen_data(valid_samples, batch_size)
 
@@ -101,9 +113,9 @@ def main():
 	model = build_model()
 
 	history = model.fit_generator(train_generator, 
-		steps_per_epoch = len(train_samples) / batch_size, 
+		steps_per_epoch = len(train_samples*2) // batch_size, 
 		validation_data = valid_generator,
-		validation_steps = len(valid_samples) / batch_size,
+		validation_steps = len(valid_samples*2) // batch_size,
 	    nb_epoch = nb_epoch,
 	    verbose = 1,
 	    callbacks = [early_stopping, model_checkpoint])
