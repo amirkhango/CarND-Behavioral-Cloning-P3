@@ -15,14 +15,15 @@ import sklearn
 np.random.seed(1337)  # for reproducibility
 path_model='./MODEL'
 path_log = './log'
-nb_epoch=6
+nb_epoch=3
 batch_size=64
 hyperparams_name = 'myCNN'
 save_file = os.path.join(path_log, '{}.loss.png'.format(hyperparams_name))
 
 load_pre_model = True
-CAMERA == False
-FLIP == False
+CAMERA = True
+FLIP = True # If you open this swich, pls remember set steps_one_epoch by factor correctly, OR set factor=0
+factor = (1/2 +2/3)
 
 def visual_log(history,save_path):
 	# summarize history for loss
@@ -88,14 +89,11 @@ def gen_data(samples, batch_size):
 				if CAMERA == True:
 					camera = np.random.choice(['center', 'left', 'right'])
 					if camera == 'left':
-
 						left_path=line[1]
 						image, measurement = get_pic_and_label(left_path)
 						images.append(image)
 						measurements.append(measurement+0.25)
-
-					else camera == 'right':
-						
+					elif camera=='right':
 						right_path=line[2]
 						image, measurement = get_pic_and_label(right_path)
 						images.append(image)
@@ -144,9 +142,9 @@ def main():
 		model = build_model()
 
 	history = model.fit_generator(train_generator, 
-		steps_per_epoch = len(train_samples*2) // batch_size, 
+		steps_per_epoch = len(train_samples) *(1+factor)// batch_size, 
 		validation_data = valid_generator,
-		validation_steps = len(valid_samples*2) // batch_size,
+		validation_steps = len(valid_samples) *(1+factor)// batch_size,
 	    nb_epoch = nb_epoch,
 	    verbose = 1,
 	    callbacks = [early_stopping, model_checkpoint])
@@ -154,7 +152,7 @@ def main():
 	print('=' * 100)
 	
 	# list all data in history
-	if load_pre_model is True:
+	if load_pre_model is False:
 		model.save(os.path.join(path_model, '{}.h5'.format(hyperparams_name)), overwrite=True)
 		print('{} is saved in {}'.format('{}.h5'.format(hyperparams_name), path_model))
 		pickle.dump((history.history), open(os.path.join(path_log, '{}.history.pkl'.format(hyperparams_name)), 'wb'))		
