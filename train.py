@@ -130,6 +130,9 @@ def main():
 	
 	# list all data in history
 	if load_pre_model is True:
+		print('*' * 100)
+		print('Load pretraining model')
+		print('*' * 100)
 		model.save(os.path.join(path_model, '{}.h5'.format(hyperparams_name)), overwrite=True)
 		print('{} is saved in {}'.format('{}.h5'.format(hyperparams_name), path_model))
 		pickle.dump((history.history), open(os.path.join(path_log, '{}.history.pkl'.format(hyperparams_name)), 'wb'))		
