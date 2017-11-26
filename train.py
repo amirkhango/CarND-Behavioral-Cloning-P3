@@ -84,37 +84,27 @@ def gen_data(samples, batch_size):
 
 			for idx in range(batch_size):
 				# Data Augmentation by right or left camera
-				if CAMERA == True:
-                                #camera = np.random.choice(['center', 'left', 'right'])
-					camera = np.random.choice(['center','left', 'right'])
-					if camera == 'left':
-						camera_path=batch_lines[idx][1]
-						bias=0.22
-					elif camera=='right':
-						camera_path=batch_lines[idx][2]
-						bias=-0.22
-					elif camera == 'center':
-						camera_path=batch_lines[idx][0]
-						bias=0
+				camera = np.random.choice(['center','left', 'right'])
+
+				if camera == 'left':
+					camera_path=batch_lines[idx][1]
+					bias=0.22
+				elif camera=='right':
+					camera_path=batch_lines[idx][2]
+					bias=-0.22
+				elif camera == 'center':
+					camera_path=batch_lines[idx][0]
+					bias=0
 
 				image, measurement = get_pic_and_label(camera_path)
-
-				
-				#images.append(image)
-				#measurements.append(measurement+bias)
 
 				# Data Augmentation by Flip
 				if FLIP == True:
 					flip_prob = np.random.random()
-					if flip_prob > 0:					
+					if flip_prob > 0.5:					
 						image = np.fliplr(image)
 						measurement = -measurement
 
-						#images.append(image_flipped)
-						#measurements.append(measurement_flipped)
-				
-				#X=np.array(batch_X)
-				#y=np.array(measurements)
 				batch_X[idx] = image
 				batch_y[idx] = measurement
 
