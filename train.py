@@ -46,7 +46,6 @@ def load_samples():
 		for line in reader:
  			samples.append(line)
 	arr_samples =sklearn.utils.shuffle(samples)
-	print(type(arr_samples))
 	return np.array(arr_samples)
 
 def gen_data(samples, batch_size):
@@ -90,7 +89,7 @@ def gen_data(samples, batch_size):
 				# Data Augmentation by Flip
 				if FLIP == True:
 					flip_prob = np.random.random()
-					if flip_prob > 0.5:					
+					if flip_prob > 0.1:					
 						image_flipped = np.fliplr(image)
 						measurement_flipped = -measurement
 						images.append(image_flipped)
@@ -137,8 +136,8 @@ def main():
 	#train_generator = gen_data(train_samples, batch_size)
 	#valid_generator = gen_data(valid_samples, batch_size)
 	
-	train_generator = gen_data(samples, batch_size)
-	valid_generator = gen_data(samples, batch_size)
+	train_generator = gen_data(train_samples, batch_size)
+	valid_generator = gen_data(valid_samples, batch_size)
 
 
 	fname_param = os.path.join(path_model, '{}.best.h5'.format(hyperparams_name))
