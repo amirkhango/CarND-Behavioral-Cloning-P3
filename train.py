@@ -15,12 +15,12 @@ import sklearn
 np.random.seed(1337)  # for reproducibility
 path_model='./MODEL'
 path_log = './log'
-nb_epoch=2
+nb_epoch=5
 batch_size=64
 hyperparams_name = 'myCNN'
 save_file = os.path.join(path_log, '{}.loss.png'.format(hyperparams_name))
 
-load_pre_model =True 
+load_pre_model = True 
 CAMERA = True
 FLIP = True # If you open this swich, pls remember set steps_one_epoch by factor correctly, OR set factor=0
 factor = (1/2 +1)
@@ -45,8 +45,9 @@ def load_samples():
 		reader = csv.reader(csvfile)
 		for line in reader:
  			samples.append(line)
-
-	return samples
+	arr_samples =sklearn.utils.shuffle(samples)
+	print(type(arr_samples))
+	return np.array(arr_samples)
 
 def gen_data(samples, batch_size):
 
@@ -57,9 +58,9 @@ def gen_data(samples, batch_size):
 		current_path='./data/IMG/'+ filename
 
 		img_pil = Image.open(current_path)
-    	w, h = img_pil.size
-    	img_cropped = img_pil.crop((0,60,w,h-20))
-    	img_resized = img_cropped.resize((resized_shape,resized_shape), Image.ANTIALIAS) # resized default to 64x64
+		w, h = img_pil.size
+		img_cropped = img_pil.crop((0,60,w,h-20))
+		img_resized = img_cropped.resize((resized_shape,resized_shape), Image.ANTIALIAS) # resized default to 64x64
 
 		image = np.asarray(img_resized)
 		measurement = float(line[3])
@@ -69,6 +70,8 @@ def gen_data(samples, batch_size):
 	#offset = 0 
 	#print('number of samples is:', len(lines))	
 	num_samples = len(samples)
+	#train_samples = samples[ :-int(len_samples*0.1) ]
+	#valid_samples = samples[ -int(len_samples*0.1): ]
 
 	while True:
 		sklearn.utils.shuffle(samples)		
@@ -121,19 +124,22 @@ def build_model():
 def main():
 
 	print("loading data...")
-
-	samples = load_samples()[:]
-	len_samples = len(samples)
+	samples = load_samples()
+	len_samples = samples.shape[0]
 
 	train_samples = samples[ :-int(len_samples*0.1) ]
 	valid_samples = samples[ -int(len_samples*0.1): ]
 	print('The number of all original (without augmented data) samples is: {} \n,\
 		the number of original train_samples is : {} \n \
 		the number of original valid_samples is : {} \n'
-		.format(len(samples), len(train_samples), len(valid_samples)))
+		.format(len_samples, train_samples.shape[0],valid_samples.shape[0]))
 
-	train_generator = gen_data(train_samples, batch_size)
-	valid_generator = gen_data(valid_samples, batch_size)
+	#train_generator = gen_data(train_samples, batch_size)
+	#valid_generator = gen_data(valid_samples, batch_size)
+	
+	train_generator = gen_data(samples, batch_size)
+	valid_generator = gen_data(samples, batch_size)
+
 
 	fname_param = os.path.join(path_model, '{}.best.h5'.format(hyperparams_name))
 	
