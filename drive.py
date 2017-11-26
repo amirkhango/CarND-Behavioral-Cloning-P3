@@ -20,6 +20,7 @@ sio = socketio.Server()
 app = Flask(__name__)
 model = None
 prev_image_array = None
+resized_shape = 64
 
 
 class SimplePIController:
@@ -63,7 +64,7 @@ def telemetry(sid, data):
 
         # ========= resized default to 64x64 =========
         w, h = image.size
-        image = image.crop((0,60,w,h-20))
+        image = image.crop((0,50,w,h-25))
         image = image.resize((resized_shape,resized_shape), Image.ANTIALIAS) 
         # ========================================================================
 

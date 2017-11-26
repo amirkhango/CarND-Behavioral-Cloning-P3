@@ -45,8 +45,7 @@ def load_samples():
 		reader = csv.reader(csvfile)
 		for line in reader:
  			samples.append(line)
-	arr_samples =sklearn.utils.shuffle(samples)
-	return np.array(arr_samples)
+	return np.array(sklearn.utils.shuffle(samples))
 
 def gen_data(samples, batch_size):
 
@@ -73,7 +72,7 @@ def gen_data(samples, batch_size):
 	#valid_samples = samples[ -int(len_samples*0.1): ]
 
 	while True:
-		sklearn.utils.shuffle(samples)		
+				
 		for offset in range(0, num_samples, batch_size):			
 			images=[]
 			measurements=[]
@@ -109,7 +108,7 @@ def gen_data(samples, batch_size):
 				X=np.array(images)
 				y=np.array(measurements)
 
-			yield sklearn.utils.shuffle(X, y)
+			yield (X, y)
 
 def build_model():
 	model = myCNN(resized_shape=resized_shape)
