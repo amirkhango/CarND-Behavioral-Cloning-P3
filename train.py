@@ -20,10 +20,10 @@ batch_size=64
 hyperparams_name = 'myCNN'
 save_file = os.path.join(path_log, '{}.loss.png'.format(hyperparams_name))
 
-load_pre_model = True
+load_pre_model =False 
 CAMERA = True
 FLIP = True # If you open this swich, pls remember set steps_one_epoch by factor correctly, OR set factor=0
-factor = (1/2 +2/3)
+factor = (1/2 +1)
 
 def visual_log(history,save_path):
 	# summarize history for loss
@@ -87,18 +87,18 @@ def gen_data(samples, batch_size):
 
 				# Data Augmentation by right or left camera
 				if CAMERA == True:
-					camera = np.random.choice(['center', 'left', 'right'])
+					#camera = np.random.choice(['center', 'left', 'right'])
+					camera = np.random.choice(['left', 'right'])
 					if camera == 'left':
-						left_path=line[1]
-						image, measurement = get_pic_and_label(left_path)
-						images.append(image)
-						measurements.append(measurement+0.25)
+						camera_path=line[1]
+						bias=0.25
 					elif camera=='right':
-						right_path=line[2]
-						image, measurement = get_pic_and_label(right_path)
-						images.append(image)
-						measurements.append(measurement-0.25)
-	        
+						camera_path=line[2]
+						bias=-0.25
+					image, measurement = get_pic_and_label(camera_path)
+					images.append(image)
+					measurements.append(measurement+bias)
+				
 				X=np.array(images)
 				y=np.array(measurements)
 
