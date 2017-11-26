@@ -12,11 +12,11 @@ import pickle
 from keras.models import load_model
 import sklearn
 
-np.random.seed(1337)  # for reproducibility
+np.random.seed(33)  # for reproducibility
 path_model='./MODEL'
 path_log = './log'
-nb_epoch=5
-batch_size=64
+nb_epoch=2
+batch_size=32
 hyperparams_name = 'myCNN'
 save_file = os.path.join(path_log, '{}.loss.png'.format(hyperparams_name))
 
@@ -58,7 +58,7 @@ def gen_data(samples, batch_size):
 
 		img_pil = Image.open(current_path)
 		w, h = img_pil.size
-		img_cropped = img_pil.crop((0,60,w,h-20))
+		img_cropped = img_pil.crop((0,50,w,h-25))
 		img_resized = img_cropped.resize((resized_shape,resized_shape), Image.ANTIALIAS) # resized default to 64x64
 
 		image = np.asarray(img_resized)
@@ -80,34 +80,31 @@ def gen_data(samples, batch_size):
 			batch_lines = samples[ offset : offset + batch_size]
 
 			for line in batch_lines:
-				center_path=line[0]
-
-				image, measurement = get_pic_and_label(center_path)
+				# Data Augmentation by right or left camera
+				if CAMERA == True:
+                                #camera = np.random.choice(['center', 'left', 'right'])
+					camera = np.random.choice(['center','left', 'right'])
+					if camera == 'left':
+                                                camera_path=line[1]
+                                                bias=0.22
+					elif camera=='right':
+						camera_path=line[2]
+						bias=-0.22
+					elif camera == 'center':
+						camera_path=line[0]
+						bias=0
+				image, measurement = get_pic_and_label(camera_path)
 				images.append(image)
-				measurements.append(measurement)
+				measurements.append(measurement+bias)
 
 				# Data Augmentation by Flip
 				if FLIP == True:
 					flip_prob = np.random.random()
-					if flip_prob > 0.1:					
+					if flip_prob > 0:					
 						image_flipped = np.fliplr(image)
 						measurement_flipped = -measurement
 						images.append(image_flipped)
 						measurements.append(measurement_flipped)
-
-				# Data Augmentation by right or left camera
-				if CAMERA == True:
-					#camera = np.random.choice(['center', 'left', 'right'])
-					camera = np.random.choice(['left', 'right'])
-					if camera == 'left':
-						camera_path=line[1]
-						bias=0.25
-					elif camera=='right':
-						camera_path=line[2]
-						bias=-0.25
-					image, measurement = get_pic_and_label(camera_path)
-					images.append(image)
-					measurements.append(measurement+bias)
 				
 				X=np.array(images)
 				y=np.array(measurements)
@@ -136,7 +133,7 @@ def main():
 	#train_generator = gen_data(train_samples, batch_size)
 	#valid_generator = gen_data(valid_samples, batch_size)
 	
-	train_generator = gen_data(train_samples, batch_size)
+	train_generator = gen_data(samples, batch_size)
 	valid_generator = gen_data(valid_samples, batch_size)
 
 
