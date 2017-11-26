@@ -67,16 +67,16 @@ def gen_data(samples, batch_size):
 		
 	#offset = 0 
 	#print('number of samples is:', len(lines))	
-	num_samples = len(samples)
+	samples = samples[ 0 : samples.shape[0] // batch_size * batch_size]
+	num_samples = samples.shape[0]
+
 	#train_samples = samples[ :-int(len_samples*0.1) ]
 	#valid_samples = samples[ -int(len_samples*0.1): ]
 
 	while True:
 				
 		for offset in range(0, num_samples, batch_size):			
-			#images=[]
-			#measurements=[]
-
+			
 			batch_X = np.zeros((batch_size, resized_shape, resized_shape, 3))
     		batch_y = np.zeros(batch_size)
 
@@ -132,7 +132,7 @@ def main():
 	#train_generator = gen_data(train_samples, batch_size)
 	#valid_generator = gen_data(valid_samples, batch_size)
 	
-	train_generator = gen_data(samples, batch_size)
+	train_generator = gen_data(train_samples, batch_size)
 	valid_generator = gen_data(valid_samples, batch_size)
 
 
