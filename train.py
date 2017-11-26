@@ -74,41 +74,51 @@ def gen_data(samples, batch_size):
 	while True:
 				
 		for offset in range(0, num_samples, batch_size):			
-			images=[]
-			measurements=[]
+			#images=[]
+			#measurements=[]
+
+			batch_X = np.zeros((batch_size, resized_shape, resized_shape, 3))
+    		batch_y = np.zeros(batch_size)
+
 			batch_lines = samples[ offset : offset + batch_size]
 
-			for line in batch_lines:
+			for idx in range(batch_size):
 				# Data Augmentation by right or left camera
 				if CAMERA == True:
                                 #camera = np.random.choice(['center', 'left', 'right'])
 					camera = np.random.choice(['center','left', 'right'])
 					if camera == 'left':
-                                                camera_path=line[1]
-                                                bias=0.22
+						camera_path=batch_lines[idx][1]
+						bias=0.22
 					elif camera=='right':
-						camera_path=line[2]
+						camera_path=batch_lines[idx][2]
 						bias=-0.22
 					elif camera == 'center':
-						camera_path=line[0]
+						camera_path=batch_lines[idx][0]
 						bias=0
+
 				image, measurement = get_pic_and_label(camera_path)
-				images.append(image)
-				measurements.append(measurement+bias)
+
+				
+				#images.append(image)
+				#measurements.append(measurement+bias)
 
 				# Data Augmentation by Flip
 				if FLIP == True:
 					flip_prob = np.random.random()
 					if flip_prob > 0:					
-						image_flipped = np.fliplr(image)
-						measurement_flipped = -measurement
-						images.append(image_flipped)
-						measurements.append(measurement_flipped)
-				
-				X=np.array(images)
-				y=np.array(measurements)
+						image = np.fliplr(image)
+						measurement = -measurement
 
-			yield (X, y)
+						#images.append(image_flipped)
+						#measurements.append(measurement_flipped)
+				
+				#X=np.array(batch_X)
+				#y=np.array(measurements)
+				batch_X[idx] = image
+				batch_y[idx] = measurement
+
+			yield (batch_X, batch_y)
 
 def build_model():
 	model = myCNN(resized_shape=resized_shape)
