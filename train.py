@@ -24,6 +24,7 @@ load_pre_model =True
 CAMERA = True
 FLIP = True # If you open this swich, pls remember set steps_one_epoch by factor correctly, OR set factor=0
 factor = (1/2 +1)
+resized_shape = 64 #resized to 64x64
 
 def visual_log(history,save_path):
 	# summarize history for loss
@@ -52,8 +53,15 @@ def gen_data(samples, batch_size):
 	def get_pic_and_label(source_path):
 
 		filename = source_path.split('/')[-1]
+
 		current_path='./data/IMG/'+ filename
-		image = np.asarray(Image.open(current_path))
+
+		img_pil = Image.open(current_path)
+    	w, h = img_pil.size
+    	img_cropped = img_pil.crop((0,60,w,h-20))
+    	img_resized = img_cropped.resize((resized_shape,resized_shape), Image.ANTIALIAS) # resized default to 64x64
+
+		image = np.asarray(img_resized)
 		measurement = float(line[3])
 
 		return image, measurement
@@ -105,7 +113,7 @@ def gen_data(samples, batch_size):
 			yield sklearn.utils.shuffle(X, y)
 
 def build_model():
-	model = myCNN()
+	model = myCNN(resized_shape=resized_shape)
 	model.compile(loss='mse', optimizer='adam')
 	model.summary()
 	return model
