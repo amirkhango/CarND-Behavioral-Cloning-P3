@@ -61,9 +61,7 @@ def gen_data(samples, batch_size):
 		img_resized = img_cropped.resize((resized_shape,resized_shape), Image.ANTIALIAS) # resized default to 64x64
 
 		image = np.asarray(img_resized)
-		measurement = float(line[3])
-
-		return image, measurement
+		return image
 		
 	#offset = 0 
 	#print('number of samples is:', len(lines))	
@@ -78,8 +76,7 @@ def gen_data(samples, batch_size):
 		for offset in range(0, num_samples, batch_size):			
 			
 			batch_X = np.zeros((batch_size, resized_shape, resized_shape, 3))
-    		batch_y = np.zeros(batch_size)
-
+			batch_y = np.zeros(batch_size)
 			batch_lines = samples[ offset : offset + batch_size]
 
 			for idx in range(batch_size):
@@ -96,8 +93,8 @@ def gen_data(samples, batch_size):
 					camera_path=batch_lines[idx][0]
 					bias=0
 
-				image, measurement = get_pic_and_label(camera_path)
-
+				image  = get_pic_and_label(camera_path)
+				measurement = float(batch_lines[idx][3]) + bias
 				# Data Augmentation by Flip
 				if FLIP == True:
 					flip_prob = np.random.random()
