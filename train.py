@@ -15,12 +15,12 @@ import sklearn
 np.random.seed(1337)  # for reproducibility
 path_model='./MODEL'
 path_log = './log'
-nb_epoch=3
+nb_epoch=2
 batch_size=64
 hyperparams_name = 'myCNN'
 save_file = os.path.join(path_log, '{}.loss.png'.format(hyperparams_name))
 
-load_pre_model =False 
+load_pre_model =True 
 CAMERA = True
 FLIP = True # If you open this swich, pls remember set steps_one_epoch by factor correctly, OR set factor=0
 factor = (1/2 +1)
@@ -152,16 +152,11 @@ def main():
 	print('=' * 100)
 	
 	# list all data in history
-	if load_pre_model is False:
-		model.save(os.path.join(path_model, '{}.h5'.format(hyperparams_name)), overwrite=True)
-		print('{} is saved in {}'.format('{}.h5'.format(hyperparams_name), path_model))
-		pickle.dump((history.history), open(os.path.join(path_log, '{}.history.pkl'.format(hyperparams_name)), 'wb'))		
-		visual_log(history=history.history, save_path=save_file)
-
-	else:
-		model.save(os.path.join(path_model, '{}.cont.h5'.format(hyperparams_name)), overwrite=True)
-		print('{} is saved in {}'.format('{}.cont.h5'.format(hyperparams_name), path_model))
-
+	model.save(os.path.join(path_model, '{}.h5'.format(hyperparams_name)), overwrite=True)
+	print('{} is saved in {}'.format('{}.h5'.format(hyperparams_name), path_model))
+	pickle.dump((history.history), open(os.path.join(path_log, '{}.history.pkl'.format(hyperparams_name)), 'wb'))		
+	visual_log(history=history.history, save_path=save_file)
+	
 	print(history.history.keys())
 
 
