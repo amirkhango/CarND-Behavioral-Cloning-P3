@@ -64,11 +64,11 @@ def telemetry(sid, data):
 
         # ========= resized default to 64x64 =========
         w, h = image.size
-        image = image.crop((0,50,w,h-25))
-        image = image.resize((resized_shape,resized_shape), Image.ANTIALIAS) 
+        cropped_image = image.crop((0,50,w,h-25))
+        resized_image = cropped_image.resize((resized_shape,resized_shape), Image.ANTIALIAS) 
+        image_array = np.asarray(resized_image)
         # ========================================================================
-
-        image_array = np.asarray(image)
+        
         steering_angle = float(model.predict(image_array[None, :, :, :], batch_size=1))
 
         throttle = controller.update(float(speed))
