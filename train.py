@@ -4,7 +4,7 @@ from PIL import Image
 import numpy as np
 import os
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-from models import *
+from model import *
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
@@ -12,18 +12,22 @@ import pickle
 from keras.models import load_model
 import sklearn
 
-np.random.seed(33)  # for reproducibility
+np.random.seed(3)  # for reproducibility
 path_model='./MODEL'
 path_log = './log'
 nb_epoch=2
 batch_size=32
-hyperparams_name = 'myCNN'
+
+steer_threshold = 0.05
+p_drop_low = 0.8 # probability of dropping the sample whose steer is lower than steer_threshold
+
+hyperparams_name = 'model'
 save_file = os.path.join(path_log, '{}.loss.png'.format(hyperparams_name))
 
-load_pre_model = True 
+load_pre_model =True
 CAMERA = True
 FLIP = True # If you open this swich, pls remember set steps_one_epoch by factor correctly, OR set factor=0
-factor = (1/2 +1)
+factor = (2/2 +1)
 resized_shape = 64 #resized to 64x64
 
 def visual_log(history,save_path):
@@ -65,7 +69,7 @@ def gen_data(samples, batch_size):
 		
 	#offset = 0 
 	#print('number of samples is:', len(lines))	
-	samples = samples[ 0 : samples.shape[0] // batch_size * batch_size]
+#	samples = samples[ 0 : samples.shape[0] // batch_size * batch_size]
 	num_samples = samples.shape[0]
 
 	#train_samples = samples[ :-int(len_samples*0.1) ]
@@ -73,28 +77,35 @@ def gen_data(samples, batch_size):
 
 	while True:
 				
-		for offset in range(0, num_samples, batch_size):			
+		#for offset in range(0, num_samples, batch_size):			
 			
 			batch_X = np.zeros((batch_size, resized_shape, resized_shape, 3))
 			batch_y = np.zeros(batch_size)
-			batch_lines = samples[ offset : offset + batch_size]
+			#batch_lines = samples[ offset : offset + batch_size]
 
 			for idx in range(batch_size):
+				sample_flag = True
+				while sample_flag:
+					sample = samples[np.random.randint(num_samples)]
+					if np.abs(float(sample[3])) < steer_threshold and np.random.random() < p_drop_low:
+						sample_flag = True # Drop this sample and re-sample
+					else:
+						sample_flag = False
 				# Data Augmentation by right or left camera
-				camera = np.random.choice(['center','left', 'right'])
+				camera = np.random.choice(['center','center','center','center','center','center','left', 'right'])
 
 				if camera == 'left':
-					camera_path=batch_lines[idx][1]
+					camera_path=sample[1]
 					bias=0.22
 				elif camera=='right':
-					camera_path=batch_lines[idx][2]
+					camera_path=sample[2]
 					bias=-0.22
 				elif camera == 'center':
-					camera_path=batch_lines[idx][0]
+					camera_path=sample[0]
 					bias=0
 
 				image  = get_pic_and_label(camera_path)
-				measurement = float(batch_lines[idx][3]) + bias
+				measurement = float(sample[3]) + bias
 				# Data Augmentation by Flip
 				if FLIP == True:
 					flip_prob = np.random.random()
@@ -108,7 +119,7 @@ def gen_data(samples, batch_size):
 			yield (batch_X, batch_y)
 
 def build_model():
-	model = myCNN(resized_shape=resized_shape)
+	model = nvidia_model()
 	model.compile(loss='mse', optimizer='adam')
 	model.summary()
 	return model
