@@ -64,9 +64,9 @@ def telemetry(sid, data):
 
         # ========= resized default to 64x64 =========
         w, h = image.size
-        cropped_image = image.crop((0,50,w,h-25))
-        resized_image = cropped_image.resize((resized_shape,resized_shape), Image.ANTIALIAS) 
-        image_array = np.asarray(resized_image)
+        crop_image = image.crop((0,50,w,h-25))
+        resize_image = crop_image.resize((resized_shape,resized_shape), Image.ANTIALIAS) 
+        image_array = np.asarray(resize_image)
         # ========================================================================
         
         steering_angle = float(model.predict(image_array[None, :, :, :], batch_size=1))
